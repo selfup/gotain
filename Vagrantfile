@@ -7,5 +7,6 @@ Vagrant.configure("2") do |config|
     vb.name = 'gotain'
     vb.cpus = 1
     vb.memory = 1024
+    vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
   end
 end
