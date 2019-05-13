@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"os/exec"
+	"syscall"
 )
 
 func main() {
@@ -11,7 +12,7 @@ func main() {
 	case "run":
 		run()
 	default:
-		fmt.Println("Nope..")
+		log.Fatal("cmd !supported")
 	}
 }
 
@@ -21,6 +22,12 @@ func run() {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
+
+	// compile target for linux because of `Cloneglags`
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+		Unshareflags: syscall.CLONE_NEWNS,
+	}
 
 	check(cmd.Run())
 }
