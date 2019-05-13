@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
 	"syscall"
 )
 
@@ -12,6 +15,8 @@ func main() {
 	switch os.Args[1] {
 	case "run":
 		run()
+	case "child":
+		child()
 	default:
 		log.Fatal("cmd !supported")
 	}
@@ -44,7 +49,7 @@ func child() {
 	cmd.Stderr = os.Stderr
 
 	check(syscall.Sethostname([]byte("container")))
-	check(syscall.Chroot("/home/liz/ubuntufs"))
+	check(syscall.Chroot("/home/gotain/ubuntufs"))
 	check(os.Chdir("/"))
 	check(syscall.Mount("proc", "proc", "proc", 0, ""))
 	check(syscall.Mount("thing", "mytemp", "tmpfs", 0, ""))
@@ -53,6 +58,16 @@ func child() {
 
 	check(syscall.Unmount("proc", 0))
 	check(syscall.Unmount("thing", 0))
+}
+
+func cg() {
+	cgroups := "/sys/fs/cgroup/"
+	pids := filepath.Join(cgroups, "pids")
+	os.Mkdir(filepath.Join(pids, "gotain"), 0755)
+	check(ioutil.WriteFile(filepath.Join(pids, "gotain/pids.max"), []byte("20"), 0700))
+	// Removes the new cgroup in place after the container exits
+	check(ioutil.WriteFile(filepath.Join(pids, "gotain/notify_on_release"), []byte("1"), 0700))
+	check(ioutil.WriteFile(filepath.Join(pids, "gotain/cgroup.procs"), []byte(strconv.Itoa(os.Getpid())), 0700))
 }
 
 func check(err error) {
