@@ -1,6 +1,6 @@
 # Gotain yourself
 
-1. ssh into VM
+1. ssh into VM (can be run locally if on linux)
 2. Clone repo: `git clone https://github.com/selfup/gotain`
 3. cd into repo
 4. `./scripts/unpack.sh`
